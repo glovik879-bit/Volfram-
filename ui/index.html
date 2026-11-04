@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Volfram</title>
+<script src="boot.js"></script>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header class="titlebar" id="titlebar">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><defs><clipPath id="lgc1"><circle cx="16" cy="16" r="14"/></clipPath></defs><g clip-path="url(#lgc1)"><rect x="0" y="0" width="32" height="9" fill="currentColor"/><rect x="0" y="11" width="32" height="10" fill="var(--acc)"/><rect x="0" y="23" width="32" height="9" fill="currentColor"/></g></svg>
+    <span class="wordmark">VOLFRAM</span>
+  </div>
+  <div class="tb-center"><div class="tb-status" id="tbStatus"><span class="dot"></span><span class="txt">Не подключено</span></div></div>
+  <div class="win-ctl">
+    <button class="wc" id="wcMin" title="Свернуть" aria-label="Свернуть"><svg viewBox="0 0 12 12"><path d="M2 6h8"/></svg></button>
+    <button class="wc" id="wcMax" title="Развернуть" aria-label="Развернуть"><svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" rx="1.2"/></svg></button>
+    <button class="wc close" id="wcClose" title="Закрыть" aria-label="Закрыть"><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-group">
+      <button class="nav-item active" data-page="home"><i data-icon="home"></i><span>Главная</span></button>
+      <button class="nav-item" data-page="servers"><i data-icon="server"></i><span>Серверы</span><b class="badge" id="badgeServers">0</b></button>
+      <button class="nav-item" data-page="subs"><i data-icon="layers"></i><span>Подписки</span><b class="badge" id="badgeSubs">0</b></button>
+      <button class="nav-item" data-page="routing"><i data-icon="route"></i><span data-short="Маршруты">Маршрутизация</span></button>
+      <button class="nav-item" data-page="conns"><i data-icon="activity"></i><span>Соединения</span><b class="badge live" id="badgeConns">0</b></button>
+      <button class="nav-item" data-page="logs"><i data-icon="terminal"></i><span>Журнал</span></button>
+      <button class="nav-item" data-page="settings"><i data-icon="settings"></i><span>Настройки</span></button>
+    </div>
+    <div class="side-card" id="sideCard">
+      <div class="sc-row"><span class="sc-label">Режим</span><span class="sc-val" id="scMode">Прокси</span></div>
+      <div class="sc-row"><span class="sc-label">Маршруты</span><span class="sc-val" id="scRouting">Умный</span></div>
+      <div class="sc-spark"><canvas id="spark" width="190" height="44"></canvas></div>
+      <div class="sc-speeds"><span class="down"><i data-icon="down"></i><b id="scDown">0 Б/с</b></span><span class="up"><i data-icon="up"></i><b id="scUp">0 Б/с</b></span></div>
+    </div>
+    <div class="side-foot" id="sideFoot">sing-box · Xray</div>
+  </nav>
+
+  <main class="content" id="content">
+
+    <section class="page active" id="page-home">
+      <div class="home">
+        <div class="panel hero" id="hero" data-state="idle">
+          <canvas class="world" id="worldMap" aria-hidden="true"></canvas>
+          <div class="map-pin" id="mapPin" hidden><span class="pin-dot"></span><span class="pin-label" id="pinLabel"></span></div>
+          <div class="hero-top">
+            <div class="hero-status">
+              <div class="label"><span class="st-dot"></span>Состояние</div>
+              <h1 class="hero-title" id="heroTitle">Не подключено</h1>
+              <div class="hero-sub" id="heroSub">Выберите сервер и нажмите кнопку</div>
+            </div>
+            <div class="hero-timer"><div class="label">Сессия</div><div class="timer" id="timer">00:00:00</div></div>
+          </div>
+          <div class="hero-bottom">
+            <button class="connect" id="orb" data-state="idle" aria-label="Подключиться"><span class="cb-ic"><i data-icon="power"></i></span><span class="cb-txt" id="orbLabel">Подключить</span><span class="cb-bar"></span></button>
+            <div class="hero-controls">
+              <div class="ctl only-desktop"><div class="label">Режим</div><div class="seg" id="segMode"><button data-v="proxy">Системный прокси</button><button data-v="tun">TUN · весь трафик</button></div></div>
+              <div class="ctl"><div class="label">Маршруты</div><div class="seg three" id="segRouting"><button data-v="smart">Умный</button><button data-v="global">Глобальный</button><button data-v="blocked">Блок-лист РФ</button></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="home-row">
+          <div class="panel server-now" id="serverNow"></div>
+          <div class="panel traffic">
+            <div class="panel-head"><div class="label">Трафик</div><div class="legend"><span class="lg down">Загрузка</span><span class="lg up">Отдача</span></div></div>
+            <div class="speeds">
+              <div class="speed down"><div class="k"><i data-icon="down"></i>Загрузка</div><b id="stDown">0 Б/с</b><small>всего <span id="stRx">0 Б</span></small></div>
+              <div class="speed up"><div class="k"><i data-icon="up"></i>Отдача</div><b id="stUp">0 Б/с</b><small>всего <span id="stTx">0 Б</span></small></div>
+            </div>
+            <div class="chart-wrap"><canvas id="chart"></canvas></div>
+          </div>
+          <div class="panel ip-card" id="ipCard"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-servers">
+      <div class="page-head">
+        <div><h2>Серверы</h2><div class="page-sub" id="srvSub">0 серверов</div></div>
+        <div class="actions">
+          <button class="btn ghost" id="btnPaste"><i data-icon="clipboard"></i>Из буфера</button>
+          <button class="btn ghost" id="btnTest"><i data-icon="zap"></i>Тест задержки</button>
+          <button class="btn primary" id="btnAdd"><i data-icon="plus"></i>Добавить</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <label class="search"><i data-icon="search"></i><input id="srvSearch" placeholder="Поиск серверов…" autocomplete="off"></label>
+        <div class="chips" id="srvGroups"></div>
+        <select class="select" id="srvSort" aria-label="Сортировка">
+          <option value="default">По порядку</option>
+          <option value="delay">По задержке</option>
+          <option value="name">По имени</option>
+        </select>
+      </div>
+      <div class="srv-grid" id="srvGrid"></div>
+    </section>
+
+    <section class="page" id="page-subs">
+      <div class="page-head">
+        <div><h2>Подписки</h2><div class="page-sub">Автоматические списки серверов от вашего провайдера</div></div>
+        <div class="actions"><button class="btn ghost" id="btnSubsUpdateAll"><i data-icon="refresh"></i>Обновить все</button></div>
+      </div>
+      <div class="card sub-add">
+        <div class="sub-add-ic"><i data-icon="link"></i></div>
+        <input class="input grow" id="subUrl" placeholder="https://… ссылка на подписку" autocomplete="off">
+        <input class="input" id="subName" placeholder="Название (необязательно)" autocomplete="off">
+        <button class="btn primary" id="btnSubAdd"><i data-icon="plus"></i>Добавить</button>
+      </div>
+      <div class="sub-list" id="subList"></div>
+    </section>
+
+    <section class="page" id="page-routing">
+      <div class="page-head"><div><h2>Маршрутизация</h2><div class="page-sub">Что пускать через VPN, а что — напрямую</div></div></div>
+      <div class="route-modes" id="routeModes">
+        <button class="route-card" data-v="smart">
+          <div class="rc-ic"><i data-icon="sparkles"></i></div>
+          <div class="rc-title">Умный</div>
+          <div class="rc-desc">Российские сайты и IP — напрямую, всё остальное — через VPN. Банки и госуслуги работают без проблем.</div>
+        </button>
+        <button class="route-card" data-v="global">
+          <div class="rc-ic"><i data-icon="globe"></i></div>
+          <div class="rc-title">Глобальный</div>
+          <div class="rc-desc">Весь трафик идёт через VPN, кроме локальной сети. Максимальная приватность.</div>
+        </button>
+        <button class="route-card" data-v="blocked">
+          <div class="rc-ic"><i data-icon="unlock"></i></div>
+          <div class="rc-title">Только заблокированное</div>
+          <div class="rc-desc">Через VPN идут только сайты из списка блокировок РФ — остальное напрямую с максимальной скоростью.</div>
+        </button>
+      </div>
+      <div class="card toggle-row">
+        <div><div class="tr-title"><i data-icon="ban"></i>Блокировать рекламу и трекеры</div><div class="tr-desc">Фильтр AdGuard DNS. Капчи, оплата и ссылки из писем не блокируются; сайты из ваших списков — тоже</div></div>
+        <label class="switch"><input type="checkbox" id="optAds"><span></span></label>
+      </div>
+      <div class="card toggle-row only-android" id="appsRow">
+        <div><div class="tr-title"><i data-icon="grid"></i>Приложения</div><div class="tr-desc" id="appsDesc">Все приложения идут через VPN</div></div>
+        <button class="btn ghost sm" id="btnApps">Настроить<i data-icon="chevron-right"></i></button>
+      </div>
+      <div class="rule-cols">
+        <div class="card rule-card r-proxy"><div class="card-title"><i data-icon="shield"></i>Всегда через VPN</div><textarea id="ruleProxy" spellcheck="false" placeholder="youtube.com&#10;keyword:openai&#10;1.2.3.0/24"></textarea></div>
+        <div class="card rule-card r-direct"><div class="card-title"><i data-icon="arrow-right"></i>Всегда напрямую</div><textarea id="ruleDirect" spellcheck="false" placeholder="sberbank.ru&#10;gosuslugi.ru"></textarea></div>
+        <div class="card rule-card r-block"><div class="card-title"><i data-icon="ban"></i>Блокировать</div><textarea id="ruleBlock" spellcheck="false" placeholder="doubleclick.net"></textarea></div>
+      </div>
+      <div class="rule-foot"><span class="hint">Один домен на строку — вместе с поддоменами. Можно вставлять ссылки целиком, кириллические домены, <code>keyword:</code> и IP/CIDR.</span><span class="save-state" id="rulesState"><i data-icon="check"></i><span>Правила применяются автоматически</span></span></div>
+    </section>
+
+    <section class="page" id="page-conns">
+      <div class="page-head">
+        <div class="ph-t"><button class="back-btn only-android" data-goto="settings" aria-label="Назад"><i data-icon="chevron-left"></i></button><div><h2>Соединения</h2><div class="page-sub" id="connSub">Активные соединения через ядро</div></div></div>
+        <div class="actions"><label class="search small"><i data-icon="search"></i><input id="connSearch" placeholder="Фильтр" autocomplete="off"></label><button class="btn danger-ghost" id="btnConnCloseAll"><i data-icon="x"></i>Закрыть все</button></div>
+      </div>
+      <div class="card table-card">
+        <div class="tbl-head conn-row"><span>Хост</span><span>Сеть</span><span>Маршрут</span><span>Правило</span><span class="num">Загр.</span><span class="num">Отд.</span><span class="num">Время</span><span></span></div>
+        <div class="tbl-body" id="connBody"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-logs">
+      <div class="page-head">
+        <div class="ph-t"><button class="back-btn only-android" data-goto="settings" aria-label="Назад"><i data-icon="chevron-left"></i></button><div><h2>Журнал</h2><div class="page-sub">События приложения и ядер sing-box / Xray</div></div></div>
+        <div class="actions">
+          <button class="btn ghost" id="btnLogCopy"><i data-icon="copy"></i>Копировать</button>
+          <button class="btn ghost" id="btnLogClear"><i data-icon="trash"></i>Очистить</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <div class="chips" id="logLevels">
+          <button class="chip active" data-v="all">Все</button>
+          <button class="chip" data-v="info">Инфо</button>
+          <button class="chip" data-v="warn">Предупреждения</button>
+          <button class="chip" data-v="error">Ошибки</button>
+        </div>
+        <div class="chips" id="logSrc">
+          <button class="chip active" data-v="all">Все источники</button>
+          <button class="chip" data-v="app">Volfram</button>
+          <button class="chip" data-v="sing-box">sing-box</button>
+          <button class="chip" data-v="xray">Xray</button>
+        </div>
+        <label class="check"><input type="checkbox" id="logAuto" checked><span>Автопрокрутка</span></label>
+      </div>
+      <div class="card log-card"><div class="log-view" id="logView"></div></div>
+    </section>
+
+    <section class="page" id="page-settings">
+      <div class="page-head"><div><h2>Настройки</h2><div class="page-sub">Изменения сохраняются автоматически и применяются при переподключении</div></div></div>
+      <div class="set-grid">
+        <div class="card set-card">
+          <div class="card-title"><i data-icon="plug"></i>Подключение</div>
+          <div class="field"><label>Локальный порт (HTTP + SOCKS5)</label><input class="input" type="number" min="1024" max="65534" data-set="mixedPort"><div class="desc only-android">Используется только в режиме «Только локальный прокси» — тогда порт открыт без пароля любым приложениям на телефоне. В режиме VPN порт случайный и закрыт паролем</div></div>
+          <div class="field row only-desktop"><div><label>Разрешить подключения из LAN</label><div class="desc" id="lanDesc">Другие устройства в сети смогут подключаться к прокси по логину и паролю</div></div><label class="switch"><input type="checkbox" data-set="allowLan"><span></span></label></div>
+          <div class="lan-box only-desktop" id="lanBox" hidden><div class="lan-grid"><span>Адрес</span><b class="mono" id="lanAddr">—</b><span>Логин</span><b class="mono" id="lanUser">—</b><span>Пароль</span><b class="mono" id="lanPass">—</b></div><button class="btn ghost" id="lanCopy"><i data-icon="copy"></i>Копировать</button></div>
+          <div class="field row"><div><label>Подключаться при запуске</label><div class="desc">К последнему выбранному серверу</div></div><label class="switch"><input type="checkbox" data-set="autoConnect"><span></span></label></div>
+          <div class="field row only-desktop"><div><label>Запускать вместе с Windows</label></div><label class="switch"><input type="checkbox" data-set="autostart"><span></span></label></div>
+          <div class="field row only-desktop"><div><label>Сворачивать в трей при закрытии</label><div class="desc">Крестик прячет окно, VPN продолжает работать. Выход — через меню значка в трее</div></div><label class="switch"><input type="checkbox" data-set="closeToTray"><span></span></label></div>
+        </div>
+        <div class="card set-card">
+          <div class="card-title"><i data-icon="shield"></i><span class="only-desktop">TUN-режим</span><span class="only-android">VPN</span></div>
+          <div class="field only-android"><label>Режим работы</label>
+            <select class="select" data-set="mode"><option value="tun">VPN — весь трафик устройства</option><option value="proxy">Только локальный прокси</option></select></div>
+          <div class="field only-desktop"><label>Сетевой стек</label>
+            <select class="select" data-set="tunStack"><option value="">Авто (mixed)</option><option value="system">system</option><option value="gvisor">gVisor</option><option value="mixed">mixed</option></select></div>
+          <div class="field"><label>MTU</label><input class="input" type="number" min="1280" max="65535" data-set="mtu"></div>
+          <div class="field row only-desktop"><div><label>Строгая маршрутизация</label><div class="desc">Защита от утечек DNS</div></div><label class="switch"><input type="checkbox" data-set="strictRoute"><span></span></label></div>
+          <div class="field row"><div><label>IPv6</label><div class="desc">Включите, если провайдер поддерживает IPv6</div></div><label class="switch"><input type="checkbox" data-set="ipv6"><span></span></label></div>
+        </div>
+        <div class="card set-card">
+          <div class="card-title"><i data-icon="dns"></i>DNS</div>
+          <div class="field"><label>Удалённый DNS (через VPN)</label><input class="input mono" data-set="remoteDns" placeholder="https://1.1.1.1/dns-query"></div>
+          <div class="field"><label>Прямой DNS</label><input class="input mono" data-set="directDns" placeholder="77.88.8.8"></div>
+          <div class="desc">Форматы: <code>8.8.8.8</code>, <code>tls://1.1.1.1</code>, <code>https://dns.google/dns-query</code>, <code>quic://…</code>, <code>local</code></div>
+        </div>
+        <div class="card set-card">
+          <div class="card-title"><i data-icon="sliders"></i>Прочее</div>
+          <div class="field row"><div><label>Автообновление подписок</label><div class="desc">При запуске и каждые 6 часов</div></div><label class="switch"><input type="checkbox" data-set="autoUpdateSubs"><span></span></label></div>
+          <div class="field"><label>Проверка задержки</label>
+            <select class="select" data-set="pingMode"><option value="tcp">TCP — доступность сервера</option><option value="get">Через прокси (GET) — реальная задержка</option></select></div>
+          <div class="field"><label>Адрес для теста задержки</label><input class="input mono" data-set="testUrl"></div>
+          <div class="field"><label>Уровень журнала ядра</label>
+            <select class="select" data-set="logLevel"><option value="error">error</option><option value="warn">warn</option><option value="info">info</option><option value="debug">debug</option></select></div>
+        </div>
+        <div class="card set-card only-android">
+          <div class="card-title"><i data-icon="shield"></i>Защита от утечек</div>
+          <button class="link-row" id="btnVpnSettings"><span><b>Блокировать интернет без VPN</b><small>Откроются настройки Android: включите «Постоянная VPN» и «Блокировать соединения без VPN» для Volfram</small></span><i data-icon="chevron-right"></i></button>
+          <div class="desc">Если ядро VPN внезапно остановится, приложение само переподключится, а интернет на это время будет заблокирован, чтобы трафик не пошёл мимо VPN.</div>
+        </div>
+        <div class="card set-card only-android">
+          <div class="card-title"><i data-icon="activity"></i>Диагностика</div>
+          <button class="link-row" data-goto="conns"><span><b>Соединения</b><small>Активные подключения через ядро</small></span><i data-icon="chevron-right"></i></button>
+          <button class="link-row" data-goto="logs"><span><b>Журнал</b><small>События приложения, sing-box и Xray</small></span><i data-icon="chevron-right"></i></button>
+        </div>
+        <div class="card set-card about">
+          <div class="about-logo"><svg class="logo big" viewBox="0 0 32 32" aria-hidden="true"><defs><clipPath id="lgc2"><circle cx="16" cy="16" r="14"/></clipPath></defs><g clip-path="url(#lgc2)"><rect x="0" y="0" width="32" height="9" fill="currentColor"/><rect x="0" y="11" width="32" height="10" fill="var(--acc)"/><rect x="0" y="23" width="32" height="9" fill="currentColor"/></g></svg></div>
+          <div class="about-body">
+            <div class="about-name">Volfram <span id="aboutVer"></span></div>
+            <div class="about-cores" id="aboutCores"></div>
+            <div class="about-protos">VLESS · Reality · XHTTP · VMess · Trojan · Shadowsocks · Hysteria2 · Hysteria · TUIC · WireGuard · AnyTLS<span class="only-desktop"> · NaïveProxy</span> · SOCKS5</div>
+          </div>
+          <div class="about-actions"><button class="btn ghost only-desktop" id="btnOpenData"><i data-icon="folder"></i>Папка данных</button><button class="btn danger-ghost" id="btnQuit"><i data-icon="power"></i>Выход</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-layer" id="modalLayer"></div>
+<div class="toasts" id="toasts"></div>
+<script src="map.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#FF0C0C0B</color>
+    <color name="icon_bg">#FF141413</color>
+    <style name="Volfram" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:colorAccent">#FFCFF54A</item>
+        <item name="android:colorPrimary">#FF0C0C0B</item>
+        <item name="android:colorPrimaryDark">#FF0C0C0B</item>
+    </style>
+</resources>
