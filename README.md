@@ -1,9 +1,5 @@
 # Volfram
 
-Простой VPN-клиент для Windows и Android. Добавляешь ссылку или подписку, нажимаешь «Подключить» — и всё работает, без возни с конфигами.
-
-Под капотом [sing-box](https://github.com/SagerNet/sing-box) и [Xray-core](https://github.com/XTLS/Xray-core).
-
 ## Возможности
 
 - **Протоколы:** VLESS (включая Reality), VMess, Trojan, Shadowsocks, Hysteria2, TUIC, AnyTLS, WireGuard, SOCKS, а на Windows ещё и NaiveProxy.
